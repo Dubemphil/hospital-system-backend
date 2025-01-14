@@ -20,7 +20,7 @@ metadata:
     app: hospital_backend_app
 spec:
   selector:
-    app: hospital_backend_app
+    app: hospital-backend-app
   ports:
     - protocol: TCP
       port: 8080
