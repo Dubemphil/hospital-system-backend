@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: hospital_backend_app-config
+  name: hospital-backend-app-config
 data:
   DB_HOST: "hospital-db.mysql.database.azure.com"
   DB_PORT: "3306"

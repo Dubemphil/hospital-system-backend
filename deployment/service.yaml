@@ -15,7 +15,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: hospital_backend_app-service
+  name: hospital-backend-app-service
   labels:
     app: hospital_backend_app
 spec:

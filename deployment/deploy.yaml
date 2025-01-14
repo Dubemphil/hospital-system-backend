@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hospital_backend_app-deployment
+  name: hospital-backend-app-deployment
 spec:
   replicas: 1  # Adjust as necessary
   selector:
@@ -21,26 +21,26 @@ spec:
         - name: DB_HOST
           valueFrom:
             configMapKeyRef:
-              name: hospital_backend_app-config
+              name: hospital-backend-app-config
               key: DB_HOST
         - name: DB_PORT
           valueFrom:
             configMapKeyRef:
-              name: hospital_backend_app-config
+              name: hospital-backend-app-config
               key: DB_PORT
         - name: DB_NAME
           valueFrom:
             configMapKeyRef:
-              name: hospital_backend_app-config
+              name: hospital-backend-app-config
               key: DB_NAME
         - name: DB_USERNAME
           valueFrom:
             secretKeyRef:
-              name: hospital_backend_app-secret
+              name: hospital-backend-app-secret
               key: DB_USERNAME
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: hospital_backend_app-secret
+              name: hospital-backend-app-secret
               key: DB_PASSWORD
 
