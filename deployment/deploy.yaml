@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hospital-backend-deployment
+  name: hospital_app-deployment
 spec:
   replicas: 1  # Adjust as necessary
   selector:
     matchLabels:
-      app: hospital-backend
+      app: hospital_app
   template:
     metadata:
       labels:
-        app: hospital-backend
+        app: hospital_app
     spec:
       containers:
-      - name: hospital-backend-container
+      - name: hospital_app-container
         image: dubemphil/hospital_app:15  # Replace this with your Docker image name
         ports:
         - containerPort: 8080  # Replace with your app's port if necessary
@@ -21,26 +21,26 @@ spec:
         - name: DB_HOST
           valueFrom:
             configMapKeyRef:
-              name: hospital-backend-config
+              name: hospital_app-config
               key: DB_HOST
         - name: DB_PORT
           valueFrom:
             configMapKeyRef:
-              name: hospital-backend-config
+              name: hospital_app-config
               key: DB_PORT
         - name: DB_NAME
           valueFrom:
             configMapKeyRef:
-              name: hospital-backend-config
+              name: hospital_app-config
               key: DB_NAME
         - name: DB_USERNAME
           valueFrom:
             secretKeyRef:
-              name: hospital-backend-secret
+              name: hospital_app-secret
               key: DB_USERNAME
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: hospital-backend-secret
+              name: hospital_app-secret
               key: DB_PASSWORD
 

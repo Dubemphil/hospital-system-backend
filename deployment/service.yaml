@@ -1,10 +1,10 @@
 # apiVersion: v1
 # kind: Service
 # metadata:
-#   name: hospital-backend-service
+#   name: hospital_app-service
 # spec:
 #   selector:
-#     app: hospital-backend-service
+#     app: hospital_app-service
 #   ports:
 #     - protocol: TCP
 #       port: 8080   # The service port exposed internally
@@ -15,12 +15,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: hospital-backend-service
+  name: hospital_app-service
   labels:
-    app: hospital-backend
+    app: hospital_app
 spec:
   selector:
-    app: hospital-backend
+    app: hospital_app
   ports:
     - protocol: TCP
       port: 8080
