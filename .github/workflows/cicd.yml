@@ -17,22 +17,22 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
       with:
-        repository: Dubemphil/Hospital_app
+        repository: Dubemphil/hospital_backend_app
         ref: master
 
 
        
     - name: Build container image
-      run: docker build -t ${{ secrets.REGISTRY_NAME }}/hospital_app:${{ github.run_number }} .
+      run: docker build -t ${{ secrets.REGISTRY_NAME }}/hospital_backend_app:${{ github.run_number }} .
     
     - name: Log in to Docker Registry with short-lived credentials
       run: docker login -u ${{ secrets.REGISTRY_NAME }} --password ${{ secrets.DOCKERHUB_TOKEN }}
     
     - name: Push image to Docker Registry
-      run: docker push ${{ secrets.REGISTRY_NAME }}/hospital_app:${{ github.run_number }}
+      run: docker push ${{ secrets.REGISTRY_NAME }}/hospital_backend_app:${{ github.run_number }}
 
     - name: Clean up Docker image locally
-      run: docker rmi ${{ secrets.REGISTRY_NAME }}/hospital_app:${{ github.run_number }}
+      run: docker rmi ${{ secrets.REGISTRY_NAME }}/hospital_backend_app:${{ github.run_number }}
 
     - name: Clean up GitHub repo on runner
       run: rm -rf ./*
@@ -50,7 +50,7 @@ jobs:
       - name: Update the kubernetes Deployment file. 
         run: |
           cat deployment/deploy.yaml
-          sed -i "s+dubemphil/hospital_app:.*+dubemphil/hospital_app:${{ github.run_number }}+g" deployment/deploy.yaml
+          sed -i "s+dubemphil/hospital_backend_app:.*+dubemphil/hospital_backend_app:${{ github.run_number }}+g" deployment/deploy.yaml
           cat deployment/deploy.yaml
           
       - name: Authenticate to Azure Cloud via AZ-Cli
