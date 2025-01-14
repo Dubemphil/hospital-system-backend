@@ -6,14 +6,14 @@ spec:
   replicas: 1  # Adjust as necessary
   selector:
     matchLabels:
-      app: hospital_backend_app
+      app: hospital-backend-app
   template:
     metadata:
       labels:
-        app: hospital_backend_app
+        app: hospital-backend-app
     spec:
       containers:
-      - name: hospital_backend_app-container
+      - name: hospital-backend-app-container
         image: dubemphil/hospital_backend_app:15  # Replace this with your Docker image name
         ports:
         - containerPort: 8080  # Replace with your app's port if necessary
