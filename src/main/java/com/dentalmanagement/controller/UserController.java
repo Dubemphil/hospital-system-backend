@@ -39,7 +39,7 @@ import io.swagger.annotations.ApiOperation;
 
 @RestController
 @RequestMapping("api/user/")
-@CrossOrigin(origins = "https://hospital.dubemphilservices.online")
+@CrossOrigin(origins = "http://hospital.dubemphilservices.online")
 public class UserController {
 
 	Logger LOG = LoggerFactory.getLogger(UserController.class);
