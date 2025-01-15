@@ -18,7 +18,7 @@ import com.dentalmanagement.utility.Constants.UserRole;
 
 @RestController
 @RequestMapping("api/patient/")
-@CrossOrigin(origins = "https://hospital.cloudwitches.online")
+@CrossOrigin(origins = "https://hospital.dubemphilservices.online")
 public class PatientController {
 	
 	Logger LOG = LoggerFactory.getLogger(PatientController.class);
