@@ -16,7 +16,7 @@ spec:
       - name: hospital-backend-app-container
         image: dubemphil/hospital_backend_app:15  # Replace this with your Docker image name
         ports:
-        - containerPort: 3000  # Replace with your app's port if necessary
+        - containerPort: 8080  # Replace with your app's port if necessary
         env:
         - name: DB_HOST
           valueFrom:
