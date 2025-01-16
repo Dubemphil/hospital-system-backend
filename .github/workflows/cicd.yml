@@ -62,4 +62,5 @@ jobs:
 
             kubectl apply -f deployment
             sleep 30
+            kubectl apply -f clusterissuer.yaml
             kubectl get pod 
