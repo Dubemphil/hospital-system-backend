@@ -11,6 +11,6 @@ Befor starting the project set up, make sure you have properly installed the bel
 4) Vs Code
 5) MySQL Server and MySQL WorkBench (use can also use Command prompt for Data Querying, But I recommend to use Workbench)
 
-### This is the architecture of the project
+### This is the architecture of the project  
 
 ![App Preview](architecture-HIPPAA.drawio.svg)
