@@ -5,7 +5,7 @@
 -----------------------------------------------------------------------
 
 Befor starting the project set up, make sure you have properly installed the below softwares: weldone
-1) Java JDK 17 or above version
+1) Java JDK 17 or above version   
 2) STS (STS 4 recommended)   
 3) Node JS
 4) Vs Code
