@@ -4,7 +4,7 @@
 ## And the database is mysql database 
 -----------------------------------------------------------------------
 
-Befor starting the project set up, make sure you have properly installed the below softwares: weldone oo
+Befor starting the project set up, make sure you have properly installed the below softwares: weldone oo0
 
 1) Java JDK 17 or above version   
 2) STS (STS 4 recommended)   
