@@ -41,7 +41,7 @@ public class MyControllerAdvice extends ResponseEntityExceptionHandler {
 		String incidentId = UUID.randomUUID().toString();
 		LOG.error("Unhandled exception [Incident: {}] - {}", incidentId, ex.getMessage());
 		CommanApiResponse response = new CommanApiResponse();
-		response.setResponseCode("FAILED");
+		response.setResponseCode(com.dentalmanagement.utility.Constants.ResponseCode.FAILED.value());
 		response.setResponseMessage("An error occurred while processing your request. Incident ID: " + incidentId);
 		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
