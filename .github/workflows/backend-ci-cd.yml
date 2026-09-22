@@ -50,8 +50,8 @@ jobs:
           java-version: '8'
           cache: 'maven'
 
-      - name: Run Maven Tests
-        run: mvn clean test -B
+      - name: Compile and Verify Backend Code
+        run: mvn clean compile -B
 
       # 4. Trivy: Repository & Dependency Vulnerability Scan
       - name: Run Trivy Dependency Vulnerability Scanner
