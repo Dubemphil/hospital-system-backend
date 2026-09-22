@@ -31,7 +31,7 @@ import io.swagger.annotations.ApiOperation;
 
 @RestController
 @RequestMapping("api/appointment/")
-@CrossOrigin(origins = "https://hospital.dubemphilservices.online")
+@CrossOrigin(origins = {"https://devopsstandard.name.ng", "https://api.devopsstandard.name.ng", "http://localhost:3000", "*"})
 public class AppointmentController {
 
 	Logger LOG = LoggerFactory.getLogger(AppointmentController.class);
@@ -96,6 +96,7 @@ public class AppointmentController {
 
 			a.setPatientContact(patient.getContact());
 			a.setPatientId(patient.getId());
+			a.setClinicBranchId(appointment.getClinicBranchId());
 			a.setPatientName(patient.getFirstName() + " " + patient.getLastName());
 
 			if (appointment.getDoctorId() != 0) {
@@ -151,6 +152,7 @@ public class AppointmentController {
 
 		a.setPatientContact(patient.getContact());
 		a.setPatientId(patient.getId());
+			a.setClinicBranchId(appointment.getClinicBranchId());
 		a.setPatientName(patient.getFirstName() + " " + patient.getLastName());
 
 		if (appointment.getDoctorId() != 0) {
@@ -206,6 +208,7 @@ public class AppointmentController {
 
 			a.setPatientContact(patient.getContact());
 			a.setPatientId(patient.getId());
+			a.setClinicBranchId(appointment.getClinicBranchId());
 			a.setPatientName(patient.getFirstName() + " " + patient.getLastName());
 
 			if (appointment.getDoctorId() != 0) {
@@ -265,6 +268,7 @@ public class AppointmentController {
 
 			a.setPatientContact(patient.getContact());
 			a.setPatientId(patient.getId());
+			a.setClinicBranchId(appointment.getClinicBranchId());
 			a.setPatientName(patient.getFirstName() + " " + patient.getLastName());
 
 			if (appointment.getDoctorId() != 0) {

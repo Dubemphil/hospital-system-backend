@@ -1,31 +1,28 @@
-
-# Stage 1: Build the application
-FROM maven:3.6.0-jdk-8 AS build
-
-# Set the working directory in the container
+# Multi-stage Build for Hospital Spring Boot Backend
+FROM maven:3.8.6-openjdk-8-slim AS builder
 WORKDIR /app
 
-# Copy the pom.xml and dependency information first
+# Cache Maven dependencies
 COPY pom.xml ./
-RUN mvn dependency:go-offline
+RUN mvn dependency:go-offline -B
 
-# Copy the rest of the application source code
+# Copy source and package JAR
 COPY src ./src
+RUN mvn clean package -DskipTests -B
 
-# Package the application
-RUN mvn clean package -DskipTests
-
-# Stage 2: Run the application
-FROM openjdk:8-jdk-alpine
-
-# Set the working directory in the container
+# Runtime Image: Lightweight, container-optimized JRE
+FROM openjdk:8-jre-alpine
 WORKDIR /app
 
-# Copy the built JAR file from the build stage
-COPY --from=build /app/target/dental-management-system-0.0.1-SNAPSHOT.jar app.jar
+# Run as non-root user for security
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
 
-# Expose the application's port
+COPY --from=builder /app/target/dental-management-system-0.0.1-SNAPSHOT.jar app.jar
+
+# Cloud Run defaults to PORT 8080
+ENV PORT=8080
 EXPOSE 8080
 
-# Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Configure JVM for container memory limits
+ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]

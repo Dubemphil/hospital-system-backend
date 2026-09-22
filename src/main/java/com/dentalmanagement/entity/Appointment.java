@@ -18,6 +18,8 @@ public class Appointment {
 
 	private int doctorId;
 
+	private int clinicBranchId;
+
 	private String problem;
 
 	private String prescription;
@@ -52,6 +54,14 @@ public class Appointment {
 
 	public void setDoctorId(int doctorId) {
 		this.doctorId = doctorId;
+	}
+
+	public int getClinicBranchId() {
+		return clinicBranchId;
+	}
+
+	public void setClinicBranchId(int clinicBranchId) {
+		this.clinicBranchId = clinicBranchId;
 	}
 
 	public String getProblem() {

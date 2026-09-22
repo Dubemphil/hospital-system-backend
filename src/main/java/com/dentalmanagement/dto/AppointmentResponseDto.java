@@ -10,6 +10,8 @@ public class AppointmentResponseDto {
 
 	private int doctorId;
 
+	private int clinicBranchId;
+
 	private String problem;
 
 	private String prescription;
@@ -54,6 +56,14 @@ public class AppointmentResponseDto {
 
 	public void setDoctorId(int doctorId) {
 		this.doctorId = doctorId;
+	}
+
+	public int getClinicBranchId() {
+		return clinicBranchId;
+	}
+
+	public void setClinicBranchId(int clinicBranchId) {
+		this.clinicBranchId = clinicBranchId;
 	}
 
 	public String getProblem() {
