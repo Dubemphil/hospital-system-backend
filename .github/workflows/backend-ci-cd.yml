@@ -1,23 +1,29 @@
-name: Horizon Health Partners - Backend CI/CD
+name: Hospital System - Backend CI/CD (AWS ECS Fargate)
 
 on:
   push:
     branches:
-      - master
       - main
+      - master
   pull_request:
     branches:
-      - master
       - main
+      - master
 
 env:
-  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  REGION: us-central1
-  REPOSITORY: hospital-apps
-  SERVICE_NAME: hhp-backend
-  WIF_PROVIDER: ${{ secrets.WIF_PROVIDER }}
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: hospital-system-staging-backend
+  ECS_CLUSTER: hospital-system-staging-cluster
+  ECS_SERVICE: hospital-system-staging-backend-service
+
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
+  # ============================================================================
+  # Stage 1: Security Scanning, Quality Checks & Compilation
+  # ============================================================================
   security-and-quality:
     name: Security & Quality Checks
     runs-on: ubuntu-latest
@@ -62,59 +68,68 @@ jobs:
           severity: 'CRITICAL,HIGH'
           exit-code: '0'
 
+  # ============================================================================
+  # Stage 2: Build, Push to ECR & Deploy to AWS ECS Fargate (Keyless OIDC)
+  # ============================================================================
   build-and-deploy:
-    name: Build & Deploy to Cloud Run (WIF Direct)
+    name: Build, Push to ECR & Deploy to ECS
     needs: security-and-quality
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      id-token: write
 
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      # Direct Workload Identity Federation (NO Service Account needed)
-      - name: Authenticate to Google Cloud via WIF
-        uses: google-github-actions/auth@v2
+      # Keyless OIDC Authentication to AWS (Zero permanent credentials)
+      - name: Configure AWS Credentials via GitHub OIDC
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          workload_identity_provider: ${{ env.WIF_PROVIDER }}
-          project_id: ${{ env.PROJECT_ID }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
 
-      - name: Configure Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
+      # Authenticate Docker to Amazon ECR
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Configure Docker for Artifact Registry
-        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
-
-      - name: Build and Push Docker Image
+      # Build and push Docker image with commit SHA & latest tags
+      - name: Build, Tag, and Push Docker Image to Amazon ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ env.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          IMAGE_TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/backend:${{ github.sha }}"
-          LATEST_TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/backend:latest"
-          
-          docker build -t $IMAGE_TAG -t $LATEST_TAG .
-          docker push $IMAGE_TAG
-          docker push $LATEST_TAG
+          echo "Building Docker image: $REGISTRY/$REPOSITORY:$IMAGE_TAG"
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -t $REGISTRY/$REPOSITORY:latest .
+          echo "Pushing image to Amazon ECR..."
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/$REPOSITORY:latest
 
-      # 5. Trivy: Container Image Vulnerability Scan
+      # Container Image Vulnerability Scan
       - name: Scan Built Image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/backend:${{ github.sha }}
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
           severity: 'CRITICAL'
           exit-code: '0'
 
-      - name: Deploy Revision to Cloud Run (No Traffic First)
+      # Deploy to Amazon ECS Fargate
+      - name: Deploy to Amazon ECS Fargate
+        env:
+          CLUSTER: ${{ env.ECS_CLUSTER }}
+          SERVICE: ${{ env.ECS_SERVICE }}
         run: |
-          gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/backend:${{ github.sha }} \
-            --region=${{ env.REGION }} \
-            --no-traffic
+          echo "Triggering rolling deployment on ECS Cluster: $CLUSTER, Service: $SERVICE..."
+          aws ecs update-service \
+            --cluster $CLUSTER \
+            --service $SERVICE \
+            --force-new-deployment
 
-      - name: Route 100% Traffic to New Revision (Atomic Cutover)
-        run: |
-          gcloud run services update-traffic ${{ env.SERVICE_NAME }} \
-            --region=${{ env.REGION }} \
-            --to-revisions=LATEST=100
+          echo "Waiting for ECS Fargate deployment stability..."
+          aws ecs wait services-stable \
+            --cluster $CLUSTER \
+            --services $SERVICE
+
+          echo "ECS Service $SERVICE deployment successfully completed!"
