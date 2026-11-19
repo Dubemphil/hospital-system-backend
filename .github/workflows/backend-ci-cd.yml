@@ -1,4 +1,4 @@
-name: Hospital System - Backend CI/CD (AWS ECS Fargate)
+name: Hospital System - Backend CI/CD (Dev to Prod Promotion)
 
 on:
   push:
@@ -12,9 +12,11 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPOSITORY: hospital-system-dev-backend
-  ECS_CLUSTER: hospital-system-dev-cluster
-  ECS_SERVICE: hospital-system-dev-backend-service
+  DEV_ECR_REPO: hospital-system-dev-backend
+  DEV_ECS_CLUSTER: hospital-system-dev-cluster
+  DEV_ECS_SERVICE: hospital-system-dev-backend-service
+  PROD_ECS_CLUSTER: hospital-system-prod-cluster
+  PROD_ECS_SERVICE: hospital-system-prod-backend-service
 
 permissions:
   contents: read
@@ -68,19 +70,21 @@ jobs:
           exit-code: '0'
 
   # ============================================================================
-  # Stage 2: Build, Push to ECR & Deploy to AWS ECS Fargate (Keyless OIDC)
+  # Stage 2: Build & Push Immutable Container Image to Amazon ECR
   # ============================================================================
-  build-and-deploy:
-    name: Build, Push to ECR & Deploy to ECS
+  build-and-push:
+    name: Build & Push Docker Image
     needs: security-and-quality
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ github.sha }}
 
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      # Keyless OIDC Authentication to AWS (Zero permanent credentials)
+      # Keyless OIDC Authentication to AWS
       - name: Configure AWS Credentials via GitHub OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -97,10 +101,10 @@ jobs:
       - name: Build, Tag, and Push Docker Image to Amazon ECR
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: ${{ env.ECR_REPOSITORY }}
+          REPOSITORY: ${{ env.DEV_ECR_REPO }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          echo "Building Docker image: $REGISTRY/$REPOSITORY:$IMAGE_TAG"
+          echo "Building immutable Docker image: $REGISTRY/$REPOSITORY:$IMAGE_TAG"
           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -t $REGISTRY/$REPOSITORY:latest .
           echo "Pushing image to Amazon ECR..."
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
@@ -110,25 +114,71 @@ jobs:
       - name: Scan Built Image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/${{ env.DEV_ECR_REPO }}:${{ github.sha }}
           severity: 'CRITICAL'
           exit-code: '0'
 
-      # Deploy to Amazon ECS Fargate
-      - name: Deploy to Amazon ECS Fargate
-        env:
-          CLUSTER: ${{ env.ECS_CLUSTER }}
-          SERVICE: ${{ env.ECS_SERVICE }}
+  # ============================================================================
+  # Stage 3: Automated Deployment to DEV Environment (Fargate)
+  # ============================================================================
+  deploy-dev:
+    name: Deploy to DEV Environment (ECS Fargate)
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment:
+      name: development
+
+    steps:
+      - name: Configure AWS Credentials via GitHub OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
+
+      - name: Deploy to DEV Amazon ECS Fargate
         run: |
-          echo "Triggering rolling deployment on ECS Cluster: $CLUSTER, Service: $SERVICE..."
+          echo "Deploying to DEV ECS Cluster: ${{ env.DEV_ECS_CLUSTER }}..."
           aws ecs update-service \
-            --cluster $CLUSTER \
-            --service $SERVICE \
+            --cluster ${{ env.DEV_ECS_CLUSTER }} \
+            --service ${{ env.DEV_ECS_SERVICE }} \
             --force-new-deployment
 
-          echo "Waiting for ECS Fargate deployment stability..."
+          echo "Waiting for DEV ECS Fargate deployment stability..."
           aws ecs wait services-stable \
-            --cluster $CLUSTER \
-            --services $SERVICE
+            --cluster ${{ env.DEV_ECS_CLUSTER }} \
+            --services ${{ env.DEV_ECS_SERVICE }}
+          echo "DEV deployment verified and stable!"
 
-          echo "ECS Service $SERVICE deployment successfully completed!"
+  # ============================================================================
+  # Stage 4: Promotion to PROD Environment (Guarded by GitHub Environment Approval)
+  # ============================================================================
+  promote-prod:
+    name: Promote to PRODUCTION Environment (ECS Fargate)
+    needs: deploy-dev
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://api.devopsstandard.name.ng
+
+    steps:
+      - name: Configure AWS Credentials via GitHub OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
+
+      - name: Deploy Same Verified Image to PRODUCTION ECS Fargate
+        run: |
+          echo "Promoting verified image (${{ github.sha }}) to PRODUCTION..."
+          aws ecs update-service \
+            --cluster ${{ env.PROD_ECS_CLUSTER }} \
+            --service ${{ env.PROD_ECS_SERVICE }} \
+            --force-new-deployment
+
+          echo "Waiting for PROD ECS Fargate deployment stability..."
+          aws ecs wait services-stable \
+            --cluster ${{ env.PROD_ECS_CLUSTER }} \
+            --services ${{ env.PROD_ECS_SERVICE }}
+          echo "PRODUCTION deployment successfully completed!"
