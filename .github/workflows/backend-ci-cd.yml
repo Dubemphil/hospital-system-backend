@@ -12,9 +12,9 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPOSITORY: hospital-system-staging-backend
-  ECS_CLUSTER: hospital-system-staging-cluster
-  ECS_SERVICE: hospital-system-staging-backend-service
+  ECR_REPOSITORY: hospital-system-dev-backend
+  ECS_CLUSTER: hospital-system-dev-cluster
+  ECS_SERVICE: hospital-system-dev-backend-service
 
 permissions:
   contents: read
