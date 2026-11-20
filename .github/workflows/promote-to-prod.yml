@@ -1,0 +1,48 @@
+name: Hospital System - Backend Promote to Production (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Docker Image Tag to deploy (e.g. git SHA or latest)'
+        required: true
+        default: 'latest'
+
+env:
+  AWS_REGION: us-east-1
+  PROD_ECS_CLUSTER: hospital-system-prod-cluster
+  PROD_ECS_SERVICE: hospital-system-prod-backend-service
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  promote-prod:
+    name: Promote to PRODUCTION Environment (ECS Fargate)
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://api.devopsstandard.name.ng
+
+    steps:
+      - name: Configure AWS Credentials via GitHub OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
+
+      - name: Deploy Verified Image to PRODUCTION ECS Fargate
+        run: |
+          echo "Promoting image tag (${{ github.event.inputs.image_tag }}) to PRODUCTION..."
+          aws ecs update-service \
+            --cluster ${{ env.PROD_ECS_CLUSTER }} \
+            --service ${{ env.PROD_ECS_SERVICE }} \
+            --force-new-deployment
+
+          echo "Waiting for PROD ECS Fargate deployment stability..."
+          aws ecs wait services-stable \
+            --cluster ${{ env.PROD_ECS_CLUSTER }} \
+            --services ${{ env.PROD_ECS_SERVICE }}
+          echo "PRODUCTION deployment successfully completed!"
