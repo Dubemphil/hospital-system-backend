@@ -14,8 +14,8 @@ RUN mvn dependency:go-offline -B
 COPY src ./src
 RUN mvn clean package -DskipTests -B
 
-# Stage 2: Minimal Secure Runtime
-FROM openjdk:8-jre-alpine
+# Stage 2: Minimal Secure Runtime (Eclipse Temurin JRE on Alpine)
+FROM eclipse-temurin:8-jre-alpine
 WORKDIR /app
 
 # Create dedicated non-root user for security (HIPAA principle of least privilege)
@@ -23,7 +23,7 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
 
 # Copy JAR artifact from builder stage
-COPY --from=builder /app/target/dental-management-system-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=builder /app/target/*.jar app.jar
 
 # AWS ECS Fargate & ALB configuration
 ENV PORT=8080
