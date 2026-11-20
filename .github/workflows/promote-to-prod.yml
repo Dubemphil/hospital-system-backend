@@ -46,3 +46,4 @@ jobs:
             --cluster ${{ env.PROD_ECS_CLUSTER }} \
             --services ${{ env.PROD_ECS_SERVICE }}
           echo "PRODUCTION deployment successfully completed!"
+
