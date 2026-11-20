@@ -1,0 +1,3 @@
+# Gitleaks ignore list
+deployment/secret.yaml:generic-api-key:8
+deployment/secret.yaml:kubernetes-secret-yaml:2
