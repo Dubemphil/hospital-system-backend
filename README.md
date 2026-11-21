@@ -22,11 +22,13 @@ This repository is the backend API engine of the decoupled three-tier hospital s
 | [⚛️ `hospital-system-frontend`](https://github.com/Dubemphil/hospital-system-frontend) | React 18, HTML5/CSS3, Single-Page App | Patient & Staff Interactive Web Portal |
 
 * **Live Web Portal**: [https://www.devopsstandard.name.ng](https://www.devopsstandard.name.ng)
-![alt text](image-1.png)
+
+![Live Web Portal](image-1.png)
+
 * **Live Direct CDN**: [https://d1v3mxc3uivi1w.cloudfront.net](https://d1v3mxc3uivi1w.cloudfront.net)
 * **Backend API Health Check**: [https://d1v3mxc3uivi1w.cloudfront.net/api/health](https://d1v3mxc3uivi1w.cloudfront.net/api/health)
 
-![alt text](image.png)
+![Backend API Health Check Response](image.png)
 
 ---
 
