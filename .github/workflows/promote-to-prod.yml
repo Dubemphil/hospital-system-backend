@@ -1,4 +1,4 @@
-name: Hospital System - Backend Promote to Production (Manual)
+name: Backend Service in Production (Promote Image)
 
 on:
   workflow_dispatch:

@@ -7,7 +7,7 @@
 [![AWS ECS](https://img.shields.io/badge/Compute-AWS%20ECS%20Fargate-FF9900?logo=amazon-ecs&logoColor=white)](https://aws.amazon.com/fargate/)
 [![Security](https://img.shields.io/badge/Security-Gitleaks%20%26%20Trivy%20Scanned-green?logo=shield)](https://github.com/aquasecurity/trivy)
 
-> **Enterprise-grade RESTful API** for the **Horizon Health Partners (HHP)** hospital management platform, built with Spring Boot, packaged as a security-hardened container, and orchestrated on AWS ECS Fargate.
+> **Enterprise-grade RESTful API** for the hospital management platform, built with Spring Boot, packaged as a security-hardened container, and orchestrated on AWS ECS Fargate.
 
 ---
 
@@ -18,12 +18,23 @@ This repository is the backend API engine of the decoupled three-tier hospital s
 | Repository | Tech Stack | Role |
 | :--- | :--- | :--- |
 | [🏗️ `hospital-system-infra`](https://github.com/Dubemphil/hospital-system-infra) | Terraform, AWS (VPC, ECS, RDS, CloudFront, KMS, OIDC) | Core Cloud Infrastructure & Security Foundation |
-| [☕ `hospital_backend`](https://github.com/Dubemphil/hospital-system-backend) | Spring Boot (Java), MySQL, Docker, Maven | RESTful Healthcare API & Business Logic |
-| [⚛️ `hospital_frontend`](https://github.com/Dubemphil/hospital-system-frontend) | React 18, HTML5/CSS3, Single-Page App | Patient & Staff Interactive Web Portal |
+| [☕ `hospital-system-backend`](https://github.com/Dubemphil/hospital-system-backend) | Spring Boot (Java), MySQL, Docker, Maven | RESTful Healthcare API & Business Logic |
+| [⚛️ `hospital-system-frontend`](https://github.com/Dubemphil/hospital-system-frontend) | React 18, HTML5/CSS3, Single-Page App | Patient & Staff Interactive Web Portal |
+
+* **Live Web Portal**: [https://www.devopsstandard.name.ng](https://www.devopsstandard.name.ng)
+![alt text](image-1.png)
+* **Live Direct CDN**: [https://d1v3mxc3uivi1w.cloudfront.net](https://d1v3mxc3uivi1w.cloudfront.net)
+* **Backend API Health Check**: [https://d1v3mxc3uivi1w.cloudfront.net/api/health](https://d1v3mxc3uivi1w.cloudfront.net/api/health)
+
+![alt text](image.png)
 
 ---
 
 ## 🏛️ Architecture & Runtime Overview
+
+<p align="center">
+  <img src="./architecture-diagram.svg" alt="Enterprise Cloud Architecture and DevSecOps Blueprint" width="100%" />
+</p>
 
 ```mermaid
 flowchart LR
@@ -102,49 +113,3 @@ The GitHub Actions workflow (`.github/workflows/backend-ci-cd.yml`) automates co
 6. **Rolling Zero-Downtime Deployment**: Updates the **AWS ECS Fargate** service with automated deployment circuit breakers and rollback protection.
 
 ---
-
-## 💻 Local Development Setup
-
-### Prerequisites
-* **Java JDK 8 or 17** (with Java 8 compatibility)
-* **Apache Maven 3.8+**
-* **MySQL Server 8.0** running locally (or via Docker)
-
-### Run Locally
-```bash
-# 1. Clone the repository
-git clone https://github.com/Dubemphil/hospital-system-backend.git
-cd hospital-system-backend
-
-# 2. Configure environment variables (optional; defaults to localhost:3306)
-export DB_URL="jdbc:mysql://localhost:3306/dental_management_system?createDatabaseIfNotExist=true"
-export DB_USER="root"
-export DB_PASSWORD="yourpassword"
-
-# 3. Build & Run
-./mvnw clean spring-boot:run
-```
-
-### Build & Run with Docker
-```bash
-# Build the multi-stage container
-docker build -t hospital-system-backend:local .
-
-# Run containerized application
-docker run -p 8080:8080 \
-  -e DB_URL="jdbc:mysql://host.docker.internal:3306/dental_management_system" \
-  -e DB_USER="root" \
-  -e DB_PASSWORD="yourpassword" \
-  hospital-system-backend:local
-```
-
-Test the health probe:
-```bash
-curl http://localhost:8080/health
-# Response: {"service":"hospital-system-backend","environment":"default","status":"UP","timestamp":1700000000000}
-```
-
----
-
-## 📄 License
-This project is licensed under the MIT License.

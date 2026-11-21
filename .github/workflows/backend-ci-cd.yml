@@ -1,4 +1,4 @@
-name: Hospital System - Backend CI/CD (Dev to Prod Promotion)
+name: Backend Service in Development (Build, Scan & Deploy)
 
 on:
   push:
