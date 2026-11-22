@@ -35,7 +35,7 @@ This repository is the backend API engine of the decoupled three-tier hospital s
 ## 🏛️ Architecture & Runtime Overview
 
 <p align="center">
-  <img src="./architecture-diagram.svg" alt="Enterprise Cloud Architecture and DevSecOps Blueprint" width="100%" />
+  <img src="./enterprise_hospital_system_cloud_devsecops_blueprint.svg" alt="Enterprise Cloud Architecture and DevSecOps Blueprint" width="100%" />
 </p>
 
 ```mermaid
